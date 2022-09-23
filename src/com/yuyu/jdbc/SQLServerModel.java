@@ -49,7 +49,8 @@ public class SQLServerModel<T> extends SQLModelBase<T> {
 
                 for (Field field : allFields) {
                     field.setAccessible(true);
-                    field.set(instance, rs.getObject(field.getAnnotation(SQLColumn.class).column()));
+                    Object value = rs.getObject(field.getAnnotation(SQLColumn.class).column());
+                    field.set(instance, rs.wasNull() ? null : value);
                 }
 
                 return instance;
@@ -77,7 +78,8 @@ public class SQLServerModel<T> extends SQLModelBase<T> {
 
                 for (Field field : allFields) {
                     field.setAccessible(true);
-                    field.set(instance, rs.getObject(field.getAnnotation(SQLColumn.class).column()));
+                    Object value = rs.getObject(field.getAnnotation(SQLColumn.class).column());
+                    field.set(instance, rs.wasNull() ? null : value);
                 }
 
                 result.add(instance);
