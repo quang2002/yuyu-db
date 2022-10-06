@@ -50,7 +50,13 @@ public class SQLServerModel<T> extends SQLModelBase<T> {
                 for (Field field : allFields) {
                     field.setAccessible(true);
                     Object value = rs.getObject(field.getAnnotation(SQLColumn.class).column());
-                    field.set(instance, rs.wasNull() ? null : value);
+                    value = rs.wasNull() ? null : value;
+
+                    field.set(instance, value);
+
+                    if (isJSONEntity()) {
+                        ((JSONEntity) instance).updateProp(field.getName(), value);
+                    }
                 }
 
                 return instance;
@@ -58,6 +64,44 @@ public class SQLServerModel<T> extends SQLModelBase<T> {
         }
 
         return null;
+    }
+
+    @Override
+    public List<T> getIf(String condition, Object... args) throws Exception {
+        if (condition == null || condition.trim().length() == 0) {
+            return getall();
+        }
+
+        List<Field> allFields = new ArrayList<>();
+        allFields.addAll(AUTO_INCREMENT_FIELDS);
+        allFields.addAll(PRIMARY_KEY_FIELDS);
+        allFields.addAll(NORMAL_FIELDS);
+
+        String sql = "SELECT * FROM [" + getTableName() + "] WHERE " + condition;
+
+        List<T> result = new ArrayList<>();
+
+        try (ResultSet rs = getConnection().executeQuery(sql, args)) {
+            while (rs.next()) {
+                T instance = entityClass.getConstructor().newInstance();
+
+                for (Field field : allFields) {
+                    field.setAccessible(true);
+                    Object value = rs.getObject(field.getAnnotation(SQLColumn.class).column());
+                    value = rs.wasNull() ? null : value;
+
+                    field.set(instance, value);
+
+                    if (isJSONEntity()) {
+                        ((JSONEntity) instance).updateProp(field.getName(), value);
+                    }
+                }
+
+                result.add(instance);
+            }
+        }
+
+        return result;
     }
 
     @Override
@@ -79,7 +123,13 @@ public class SQLServerModel<T> extends SQLModelBase<T> {
                 for (Field field : allFields) {
                     field.setAccessible(true);
                     Object value = rs.getObject(field.getAnnotation(SQLColumn.class).column());
-                    field.set(instance, rs.wasNull() ? null : value);
+                    value = rs.wasNull() ? null : value;
+
+                    field.set(instance, value);
+
+                    if (isJSONEntity()) {
+                        ((JSONEntity) instance).updateProp(field.getName(), value);
+                    }
                 }
 
                 result.add(instance);

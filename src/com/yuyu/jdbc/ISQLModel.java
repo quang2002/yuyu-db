@@ -4,6 +4,7 @@ import java.util.List;
 
 public interface ISQLModel<T> {
     public T get(Object... primaryKeys) throws Exception;
+    public List<T> getIf(String condition, Object... args) throws Exception;
     public List<T> getall() throws Exception;
 
     public int insert(T data) throws Exception;

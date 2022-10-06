@@ -12,6 +12,7 @@ public abstract class SQLModelBase<T> implements ISQLModel<T> {
     protected final Class<T> entityClass;
     private final String tableName;
     private SQLConnection connection;
+    private final Boolean isJSONEntity;
 
     protected final ArrayList<Field> AUTO_INCREMENT_FIELDS = new ArrayList<>();
     protected final ArrayList<Field> PRIMARY_KEY_FIELDS = new ArrayList<>();
@@ -29,16 +30,25 @@ public abstract class SQLModelBase<T> implements ISQLModel<T> {
         return tableName;
     }
 
-    SQLModelBase(Class<T> entityClass) throws SQLException {
+    protected Boolean isJSONEntity() {
+        return isJSONEntity;
+    }
+
+    public SQLModelBase(Class<T> entityClass) throws SQLException {
         this.entityClass = entityClass;
 
+        // check that entityClass is subclass of JSONEntity
+        this.isJSONEntity = JSONEntity.class.isAssignableFrom(entityClass);
+
+        // check that entityClass is annotated with SQLTable
         if (this.entityClass.isAnnotationPresent(SQLTable.class)) {
             this.tableName = this.entityClass.getAnnotation(SQLTable.class).table();
         } else {
             throw new SQLException("The class " + this.entityClass.getName() + " is not annotated with @SQLTable");
         }
 
-        for (Field field : entityClass.getFields()) {
+        // prepare fields
+        for (Field field : entityClass.getDeclaredFields()) {
             if (field.isAnnotationPresent(SQLColumn.class)) {
                 SQLColumn fieldAnnotation = field.getAnnotation(SQLColumn.class);
 
